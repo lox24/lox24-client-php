@@ -1,0 +1,6 @@
+vendor
+.idea
+/.phpunit.result.cache
+/.phpunit.cache/
+/coverage.txt
+/.html-coverage/

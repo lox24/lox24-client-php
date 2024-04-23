@@ -7,6 +7,7 @@ namespace lox24\api_client_tests\api\sms;
 use lox24\api_client\api\ServiceCode;
 use lox24\api_client\api\sms\SmsItemRequest;
 use lox24\api_client\api\TextEncoding;
+use lox24\api_client\api\VoiceLang;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
@@ -61,8 +62,8 @@ class SmsItemRequestTest extends TestCase
     public function testSetAndGetDeliveryAt(): void
     {
         $sms = new SmsItemRequest('sender', 'phone', 'text');
-        $sms->setDeliveryAt(123456789);
-        $this->assertEquals(123456789, $sms->getDeliveryAt());
+        $sms->setDeliveryAt((new \DateTime())->setTimestamp(123456789));
+        $this->assertEquals(123456789, $sms->getDeliveryAt()?->getTimestamp());
     }
 
     public function testSetAndGetTextEncoding(): void
@@ -82,8 +83,8 @@ class SmsItemRequestTest extends TestCase
     public function testSetAndGetVoiceLang(): void
     {
         $sms = new SmsItemRequest('sender', 'phone', 'text');
-        $sms->setVoiceLang('en');
-        $this->assertEquals('en', $sms->getVoiceLang());
+        $sms->setVoiceLang(VoiceLang::English);
+        $this->assertEquals(VoiceLang::English, $sms->getVoiceLang());
     }
 
     public function testSetAndGetIsDeleteText(): void
@@ -131,10 +132,10 @@ class SmsItemRequestTest extends TestCase
             'phone',
             'message',
             ServiceCode::Direct,
-            123456789,
+            (new \DateTime())->setTimestamp(123456789),
             TextEncoding::Auto,
             1,
-            'en',
+            VoiceLang::English,
             true,
             'callbackData'
         );
@@ -145,13 +146,15 @@ class SmsItemRequestTest extends TestCase
             'text' => 'message',
             'service_code' => ServiceCode::Direct->value,
             'is_unicode' => null,
-            'deliveryAt' => 123456789,
+            'delivery_at' => 123456789,
             'source' => 1,
-            'voiceLang' => 'en',
-            'isDeleteText' => true,
-            'callbackData' => 'callbackData',
+            'voice_lang' => 'EN',
+            'is_delete_text' => true,
+            'callback_data' => 'callbackData',
         ];
-
-        $this->assertEquals($expectedArray, $sms->jsonSerialize());
+// Failed asserting that '
+// {"sender_id":"sender","phone":"phone","text":"message","service_code":"direct","is_unicode":null,"delivery_at":123456789,"voice_lang":"EN","is_delete_text":true,"source":1,"callback_data":"callbackData"}'
+// {"sender_id":"sender","phone":"phone","text":"message","service_code":"direct","is_unicode":null,"deliveryAt":123456789,"source":1,"voiceLang":"EN","isDeleteText":true,"callbackData":"callbackData"}".
+        $this->assertJsonStringEqualsJsonString(json_encode($expectedArray), json_encode($sms->jsonSerialize()));
     }
 }

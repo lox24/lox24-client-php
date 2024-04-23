@@ -1,3 +1,16 @@
 parameters:
     phpVersion: 80200
-    level: 5
+    level: max
+    treatPhpDocTypesAsCertain: false
+    ignoreErrors:
+        - "#Cannot access offset [a-z'|]+ on mixed#"
+        - "#expects array, mixed given#"
+        - "#no value type specified in iterable type array#"
+        - "#Offset 'hydra:view' does not exist on array#"
+    paths:
+        - src
+    excludePaths:
+        - example/*
+        - tests/*
+        - vendor/*
+

@@ -12,18 +12,36 @@ use Stringable;
 abstract class ListFilter implements Stringable, JsonSerializable
 {
 
+    /**
+     * @var array<string, mixed>
+     */
     private array $params = [];
 
     abstract protected function isFieldExists(string $field): bool;
 
+    /**
+     * @return array<string>
+     */
     abstract protected function allowedOrderingFields(): array;
 
+    /**
+     * @return array<string>
+     */
     abstract protected function allowedRangeFields(): array;
 
+    /**
+     * @return array<string>
+     */
     abstract protected function allowedBooleanFields(): array;
 
+    /**
+     * @return array<string>
+     */
     abstract protected function allowedSearchFields(): array;
 
+    /**
+     * @return array<string>
+     */
     abstract protected function allowedExistFields(): array;
 
 
@@ -37,15 +55,18 @@ abstract class ListFilter implements Stringable, JsonSerializable
             ClientException::throw("Invalid ordering field $field.");
         }
 
-        $this->params["_order"][$field] ??= [];
-        $this->params["_order"][$field] = $ordering->value;
+        if(empty($this->params['_order'])) {
+            $this->params['_order'] = [$field => $ordering->value];
+        } else {
+            $this->params['_order'][$field] = $ordering->value;
+        }
 
         return $this;
     }
 
     public function removeOrderBy(string $field): self
     {
-        unset($this->params["_order"][$field]);
+        unset($this->params['_order'][$field]);
 
         $this->cleanUpEmptyParam('_order');
 
@@ -63,8 +84,7 @@ abstract class ListFilter implements Stringable, JsonSerializable
             ClientException::throw("Invalid range field $field.");
         }
 
-        $this->params[$field] ??= [];
-        $this->params[$field]['between'] = "$from..$to";
+        $this->params[$field] = ['between' => "$from..$to"];
 
         return $this;
     }
@@ -80,7 +100,7 @@ abstract class ListFilter implements Stringable, JsonSerializable
     /**
      * @throws ApiException|ClientException
      */
-    public function greater(string $field, string|int|float|null $value): self
+    public function greater(string $field, string|int|float $value): self
     {
         return $this->setRangeCondition($field, 'gt', $value);
     }
@@ -93,7 +113,7 @@ abstract class ListFilter implements Stringable, JsonSerializable
     /**
      * @throws ApiException|ClientException
      */
-    public function greaterOrEqual(string $field, string|int|float|null $value): self
+    public function greaterOrEqual(string $field, string|int|float $value): self
     {
         return $this->setRangeCondition($field, 'gte', $value);
     }
@@ -106,7 +126,7 @@ abstract class ListFilter implements Stringable, JsonSerializable
     /**
      * @throws ApiException|ClientException
      */
-    public function less(string $field, string|int|float|null $value): self
+    public function less(string $field, string|int|float $value): self
     {
         return $this->setRangeCondition($field, 'lt', $value);
     }
@@ -119,7 +139,7 @@ abstract class ListFilter implements Stringable, JsonSerializable
     /**
      * @throws ApiException|ClientException
      */
-    public function lessOrEqual(string $field, string|int|float|null $value): self
+    public function lessOrEqual(string $field, string|int|float $value): self
     {
         return $this->setRangeCondition($field, 'lte', $value);
     }
@@ -139,7 +159,12 @@ abstract class ListFilter implements Stringable, JsonSerializable
         }
 
         $this->params[$field] ??= [];
-        $this->params[$field][] = $value;
+        if (is_array($this->params[$field])) {
+            $this->params[$field][] = $value;
+        } else {
+            $this->params[$field] = $value;
+        }
+
 
         return $this;
     }
@@ -201,8 +226,11 @@ abstract class ListFilter implements Stringable, JsonSerializable
             ClientException::throw("Invalid 'exists' field $field");
         }
 
-        $this->params['exists'] ??= [];
-        $this->params['exists'][$field] = 1;
+        if(empty($this->params['exists'])) {
+            $this->params['exists'] = [$field => 1];
+        } else {
+            $this->params['exists'][$field] = 1;
+        }
 
         return $this;
     }
@@ -216,8 +244,11 @@ abstract class ListFilter implements Stringable, JsonSerializable
             ClientException::throw("Invalid 'exists' field $field");
         }
 
-        $this->params['exists'] ??= [];
-        $this->params['exists'][$field] = 0;
+        if(empty($this->params['exists'])) {
+            $this->params['exists'] = [$field => 0];
+        } else {
+            $this->params['exists'][$field] = 0;
+        }
 
         return $this;
     }
@@ -243,8 +274,12 @@ abstract class ListFilter implements Stringable, JsonSerializable
             ClientException::throw("Invalid range field $field.");
         }
 
-        $this->params[$field] ??= [];
-        $this->params[$field][$type] = $value;
+        $this->params[$field] = $this->params[$field] ?? [];
+        if(empty($this->params[$field])) {
+            $this->params[$field] = [$type => $value];
+        } else {
+            $this->params[$field][$type] = $value;
+        }
 
         return $this;
     }
@@ -260,6 +295,9 @@ abstract class ListFilter implements Stringable, JsonSerializable
     }
 
 
+    /**
+     * @return array<string, mixed>
+     */
     public function jsonSerialize(): array
     {
         return $this->params;
@@ -278,6 +316,9 @@ abstract class ListFilter implements Stringable, JsonSerializable
         }
     }
 
+    /**
+     * @param array<string> $allowed
+     */
     private function isFieldAllowed(string $field, array $allowed): bool
     {
         return $this->isFieldExists($field) && in_array($field, $allowed, true);

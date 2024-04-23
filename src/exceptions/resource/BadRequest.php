@@ -10,14 +10,21 @@ use lox24\api_client\exceptions\ApiException;
 final class BadRequest extends ApiException
 {
 
+
+    /**
+     * @return array<string, mixed>|null
+     */
     public function getDescription(): ?array
     {
         $body = $this->getResponse()?->getBody()->getContents();
         try {
-            return $body ? json_decode($body, true, 512, JSON_THROW_ON_ERROR) : null;
+            /** @var array<string, mixed>|null $result */
+            $result = $body ? (array)json_decode($body, true, 512, JSON_THROW_ON_ERROR) : null;
         } catch (JsonException) {
-            return null;
+            $result = null;
         }
+
+        return $result;
     }
 
 

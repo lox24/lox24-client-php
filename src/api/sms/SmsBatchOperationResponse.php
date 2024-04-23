@@ -20,7 +20,13 @@ final readonly class SmsBatchOperationResponse extends Response
             return 0;
         }
 
-        return array_values($this->response->getData())[0] ?? 0;
+        $value = array_values($this->response->getData())[0] ?? 0;
+
+        if(!is_scalar($value)) {
+            return 0;
+        }
+
+        return (int)$value;
     }
 
 

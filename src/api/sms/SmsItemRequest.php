@@ -4,24 +4,27 @@ declare(strict_types=1);
 
 namespace lox24\api_client\api\sms;
 
+use DateTimeInterface;
+use JsonSerializable;
 use lox24\api_client\api\ServiceCode;
 use lox24\api_client\api\TextEncoding;
+use lox24\api_client\api\VoiceLang;
 use lox24\api_client\internals\TextEncodingConverter;
 
-final class SmsItemRequest implements \JsonSerializable
+final class SmsItemRequest implements JsonSerializable
 {
 
     public function __construct(
-        private string       $senderId,
-        private string       $phone,
-        private string       $text,
-        private ServiceCode  $serviceCode = ServiceCode::Direct,
-        private int          $deliveryAt = 0,
-        private TextEncoding $textEncoding = TextEncoding::Auto,
-        private ?int         $source = null,
-        private ?string      $voiceLang = null,
-        private bool         $isDeleteText = false,
-        private ?string      $callbackData = null
+        private string             $senderId,
+        private string             $phone,
+        private string             $text,
+        private ServiceCode        $serviceCode = ServiceCode::Direct,
+        private ?DateTimeInterface $deliveryAt = null,
+        private TextEncoding       $textEncoding = TextEncoding::Auto,
+        private ?int               $source = null,
+        private ?VoiceLang         $voiceLang = null,
+        private bool               $isDeleteText = false,
+        private ?string            $callbackData = null
     ) {
     }
 
@@ -73,12 +76,12 @@ final class SmsItemRequest implements \JsonSerializable
         return $this;
     }
 
-    public function getDeliveryAt(): int
+    public function getDeliveryAt(): ?DateTimeInterface
     {
         return $this->deliveryAt;
     }
 
-    public function setDeliveryAt(int $deliveryAt): SmsItemRequest
+    public function setDeliveryAt(?DateTimeInterface $deliveryAt): SmsItemRequest
     {
         $this->deliveryAt = $deliveryAt;
 
@@ -109,12 +112,12 @@ final class SmsItemRequest implements \JsonSerializable
         return $this;
     }
 
-    public function getVoiceLang(): ?string
+    public function getVoiceLang(): ?VoiceLang
     {
         return $this->voiceLang;
     }
 
-    public function setVoiceLang(?string $voiceLang): SmsItemRequest
+    public function setVoiceLang(?VoiceLang $voiceLang): SmsItemRequest
     {
         $this->voiceLang = $voiceLang;
 
@@ -145,6 +148,9 @@ final class SmsItemRequest implements \JsonSerializable
         return $this;
     }
 
+    /**
+     * @return array<string, bool|int|string|null>
+     */
     public function jsonSerialize(): array
     {
         $result = [
@@ -153,17 +159,17 @@ final class SmsItemRequest implements \JsonSerializable
             'text' => $this->text,
             'service_code' => $this->serviceCode->value,
             'is_unicode' => (new TextEncodingConverter())->fromEnum($this->textEncoding),
-            'deliveryAt' => $this->deliveryAt,
-            'voiceLang' => $this->voiceLang,
-            'isDeleteText' => $this->isDeleteText,
+            'delivery_at' => $this->deliveryAt?->getTimestamp() ?: 0,
+            'voice_lang' => $this->voiceLang->value ?? null,
+            'is_delete_text' => $this->isDeleteText,
         ];
 
         if ($this->source !== null) {
             $result['source'] = $this->source;
         }
 
-        if($this->callbackData !== null) {
-            $result['callbackData'] = $this->callbackData;
+        if ($this->callbackData !== null) {
+            $result['callback_data'] = $this->callbackData;
         }
 
         return $result;

@@ -23,6 +23,7 @@ final class SmsListFilter extends ListFilter
         $field = SmsListFilterFields::TextEncoding->value;
 
         if($textEncoding === TextEncoding::Gsm || $textEncoding === TextEncoding::Unicode) {
+            /** @var bool $value */
             $value = (new TextEncodingConverter())->fromEnum($textEncoding);
             $this->boolean($field, $value);
         } else {
@@ -45,7 +46,6 @@ final class SmsListFilter extends ListFilter
     {
         return (bool)SmsListFilterFields::tryFrom($field);
     }
-
 
     protected function allowedOrderingFields(): array
     {

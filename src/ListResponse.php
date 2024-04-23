@@ -32,7 +32,7 @@ readonly abstract class ListResponse extends Response
 
     public function getTotalItems(): int
     {
-        return $this->response->getData()['hydra:totalItems'] ?? 0;
+        return (int)($this->response->getData()['hydra:totalItems'] ?? 0);
     }
 
     public function getPager(): ListPager

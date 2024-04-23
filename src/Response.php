@@ -6,7 +6,6 @@ namespace lox24\api_client;
 
 readonly class Response
 {
-
     public function __construct(
         private int $status,
         private ?array $data

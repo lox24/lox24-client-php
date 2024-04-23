@@ -64,25 +64,30 @@ class ClientTest extends TestCase
      */
     public function testSendSuccessfulRequest(): void
     {
-        $config = new Config('test-token', 'https://api.example.com');
+        $config = new Config('test-token', 'https://api.lox24.eu');
         $client = new Client($this->httpClientMock, $this->requestFactoryMock, $config);
 
-        $requestData = new Request(new Endpoint(Method::GET, '/test'));
+        $request = new Request(new Endpoint(Method::GET, '/test'));
         $responseData = ['success' => true];
 
         $this->requestFactoryMock->method('createRequest')
-            ->willReturn($this->requestMock);
+                                 ->willReturn($this->requestMock);
 
         $this->requestMock->method('withHeader')->willReturnSelf();
-        $this->requestMock->method('getBody')->willReturn($this->streamMock);
+        $this->requestMock->method('getBody')->willReturn(
+            $this->createMock(StreamInterface::class)
+        );
 
-        $this->httpClientMock->method('sendRequest')->willReturn($this->responseMock);
+        $responseStr = json_encode($responseData, JSON_THROW_ON_ERROR);
+        $this->streamMock->method('getContents')->willReturn($responseStr);
+        $this->streamMock->method('__toString')->willReturn($responseStr);
 
         $this->responseMock->method('getStatusCode')->willReturn(200);
         $this->responseMock->method('getBody')->willReturn($this->streamMock);
-        $this->streamMock->method('getContents')->willReturn(json_encode($responseData, JSON_THROW_ON_ERROR));
 
-        $response = $client->send($requestData);
+        $this->httpClientMock->method('sendRequest')->willReturn($this->responseMock);
+
+        $response = $client->send($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertEquals(200, $response->getStatus());
@@ -100,7 +105,7 @@ class ClientTest extends TestCase
      */
     public function testRequestDataPassedSuccessToHttpRequest()
     {
-        $config = new Config('test-token', 'https://api.example.com');
+        $config = new Config('test-token', 'https://api.lox24.eu');
         $client = new Client($this->httpClientMock, $this->requestFactoryMock, $config);
 
 
@@ -109,12 +114,12 @@ class ClientTest extends TestCase
         $responseData = ['success' => true];
 
         $this->requestFactoryMock->method('createRequest')
-            ->willReturn($this->requestMock);
+                                 ->willReturn($this->requestMock);
 
         $this->requestMock->method('withHeader')->willReturnSelf();
         $this->streamMock->expects($this->once())
-            ->method('write')
-            ->with($this->equalTo(json_encode($item, JSON_THROW_ON_ERROR)));
+                         ->method('write')
+                         ->with($this->equalTo(json_encode($item, JSON_THROW_ON_ERROR)));
         $this->requestMock->method('getBody')->willReturn($this->streamMock);
 
         $this->httpClientMock->method('sendRequest')->willReturn($this->responseMock);
@@ -144,7 +149,7 @@ class ClientTest extends TestCase
             $this->expectException($exception);
         }
 
-        $config = new Config('invalid-token', 'https://api.example.com');
+        $config = new Config('invalid-token', 'https://api.lox24.eu');
         $client = new Client($this->httpClientMock, $this->requestFactoryMock, $config);
 
         $requestData = new Request(new Endpoint(Method::GET, '/test'));
@@ -195,7 +200,7 @@ class ClientTest extends TestCase
     {
         $this->expectException(ClientException::class);
         $this->requestFactoryMock->method('createRequest')->willThrowException(new \Exception());
-        $config = new Config('token', 'https://api.example.com');
+        $config = new Config('token', 'https://api.lox24.eu');
         $client = new Client($this->httpClientMock, $this->requestFactoryMock, $config);
         $requestData = new Request(new Endpoint(Method::GET, '/test'));
         $client->send($requestData);
@@ -214,7 +219,7 @@ class ClientTest extends TestCase
         $this->requestFactoryMock->method('createRequest')->willThrowException(
             new InvalidCredentials('InvalidCredentials')
         );
-        $config = new Config('token', 'https://api.example.com');
+        $config = new Config('token', 'https://api.lox24.eu');
         $client = new Client($this->httpClientMock, $this->requestFactoryMock, $config);
         $requestData = new Request(new Endpoint(Method::GET, '/test'));
         $client->send($requestData);
@@ -229,9 +234,9 @@ class ClientTest extends TestCase
      */
     public function testJsonExceptions(): void
     {
-        $this->expectException(RequestException::class);
+        $this->expectException(ClientException::class);
         $this->requestFactoryMock->method('createRequest')->willThrowException(new JsonException());
-        $config = new Config('token', 'https://api.example.com');
+        $config = new Config('token', 'https://api.lox24.eu');
         $client = new Client($this->httpClientMock, $this->requestFactoryMock, $config);
         $requestData = new Request(new Endpoint(Method::GET, '/test'));
         $client->send($requestData);

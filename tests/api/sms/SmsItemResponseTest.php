@@ -3,8 +3,11 @@
 namespace lox24\api_client_tests\api\sms;
 
 use lox24\api_client\api\ServiceCode;
+use lox24\api_client\api\sms\DlrCode;
 use lox24\api_client\api\sms\SmsItemResponse;
+use lox24\api_client\api\sms\SmsStatus;
 use lox24\api_client\api\TextEncoding;
+use lox24\api_client\api\VoiceLang;
 use lox24\api_client\Response;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -16,7 +19,7 @@ class SmsItemResponseTest extends TestCase
     /**
      * @throws \JsonException
      */
-    public function testArrayParsing()
+    public function testArrayParsing(): void
     {
         $str = '{
             "@id": "/sms/9fe26332-cdbe-11ee-8d61-7c10c91d54a5",
@@ -56,15 +59,15 @@ class SmsItemResponseTest extends TestCase
         $this->assertEquals('Auth0', $response->getSenderId());
         $this->assertEquals('+1234567890', $response->getPhone());
         $this->assertEquals(0, $response->getDeliveryAt());
-        $this->assertEquals(100, $response->getStatusCode());
+        $this->assertEquals(SmsStatus::Sent, $response->getStatusCode());
         $this->assertEquals(1708192910, $response->getGatewaySentAt());
         $this->assertEquals(0, $response->getSource());
-        $this->assertEquals(1, $response->getDlrCode());
+        $this->assertEquals(DlrCode::Ok, $response->getDlrCode());
         $this->assertEquals('1.1.1.1', $response->getIp());
         $this->assertEquals(1708192910, $response->getCreatedAt());
         $this->assertEquals(TextEncoding::Gsm, $response->getTextEncoding());
-        $this->assertEquals('GE', $response->getIso2());
-        $this->assertEquals('EN', $response->getVoiceLang());
+        $this->assertEquals('GE', $response->getCountryCode());
+        $this->assertEquals(VoiceLang::English, $response->getVoiceLang());
         $this->assertEquals(1, $response->getPartsCount());
         $this->assertEquals(94, $response->getCharsCount());
         $this->assertNull($response->getCallbackData());

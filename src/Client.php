@@ -54,8 +54,6 @@ readonly final class Client
             $response = $this->sendRequest($r);
         } catch (ApiException $e) {
             throw $e;
-        } catch (JsonException $e) {
-            throw new RequestException("An error occurred while sending the message: ".$e->getMessage());
         } catch (Throwable $e) {
             throw (new ClientException("Unexpected error: {$e->getMessage()}", 0, $e))
                 ->setResponse($response);
@@ -83,24 +81,33 @@ readonly final class Client
         $request = $request->withHeader('Content-Type', 'application/json');
         $request = $request->withHeader('User-Agent', self::USER_AGENT);
 
+        $content = null;
+        $code = null;
+
         try {
             if ($r->getData() !== null) {
                 $request->getBody()->write(json_encode($r->getData(), JSON_THROW_ON_ERROR));
             }
             $response = $this->client->sendRequest($request);
+            $this->processStatusCode($response);
+            $content = (string)$response->getBody();
+            $code = $response->getStatusCode();
         } catch (ClientExceptionInterface|JsonException $e) {
             new ClientException("An error occurred while sending the message: ".$e->getMessage(), 0, $e);
         }
 
-        $this->processStatusCode($response);
-        $content = (string)$response->getBody();
+        if(!$code) {
+            throw new UnexpectedException("Response status code is empty");
+        }
+
         try {
-            $data = $content ? json_decode($content, true, 512, JSON_THROW_ON_ERROR) : null;
+            /** @var array<string, mixed>|null $data */
+            $data = $content ? (array)json_decode($content, true, 512, JSON_THROW_ON_ERROR) : null;
         } catch (JsonException $e) {
             throw new UnexpectedException("An error occurred while decoding the response: ".$e->getMessage());
         }
 
-        return new Response($response->getStatusCode(), $data);
+        return new Response($code, $data);
     }
 
     /**

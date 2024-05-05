@@ -30,10 +30,10 @@ You could use your own or any PSR-17/PSR-18 compatible libraries, e.g.:
 
 
 ### Install with Composer
-`lox24-client-php` is available on Packagist as the [`lox24/sdk`](https://packagist.org/packages/lox24/sdk) package:
+`lox24-client-php` is available on Packagist as the [`lox24eu/lox24_api_client`](https://packagist.org/packages/lox24eu/lox24_api_client) package:
 
 ```shell
-composer require lox24/sdk
+composer require lox24eu/lox24_api_client
 ```
 
 ### Usage example with Guzzle HTTP client
@@ -41,7 +41,7 @@ composer require lox24/sdk
 Add Guzzle HTTP client implementation to your project:
 
 ```shell
-composer require lox24/sdk
+composer require lox24eu/lox24_api_client
 ```
 
 Example of the script which sends an SMS using LOX24's REST API and PHP:

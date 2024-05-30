@@ -2,7 +2,7 @@
   "name": "lox24eu/lox24_api_client",
   "description": "LOX24 SMS GatewayAPI v2 official client",
   "minimum-stability": "stable",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "library",
   "license": "MIT",
   "support": {

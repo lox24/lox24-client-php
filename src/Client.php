@@ -77,7 +77,7 @@ readonly final class Client
         );
 
         $request = $request->withHeader(self::AUTH_HEADER, $this->config->getToken());
-        $request = $request->withHeader('Accept', 'application/json+ld');
+        $request = $request->withHeader('Accept', 'application/ld+json');
         $request = $request->withHeader('Content-Type', 'application/json');
         $request = $request->withHeader('User-Agent', self::USER_AGENT);
 

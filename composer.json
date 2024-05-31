@@ -2,7 +2,7 @@
   "name": "lox24eu/lox24_api_client",
   "description": "LOX24 SMS GatewayAPI v2 official client",
   "minimum-stability": "stable",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "type": "library",
   "license": "MIT",
   "support": {
@@ -16,7 +16,7 @@
     "psr/http-client": "1.x",
     "psr/http-message": "2.x",
     "psr/http-factory": "1.x",
-    "psr/log": "2.x"
+    "psr/log": "3.x"
   },
   "require-dev": {
     "phpunit/phpunit": "^10.0",
